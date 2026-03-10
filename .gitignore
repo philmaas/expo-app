@@ -41,3 +41,21 @@ app-example
 # generated native folders
 /ios
 /android
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+
+# Windows
+Thumbs.db
+ehthumbs.db
+
+# EAS
+.eas/
+
+# env files
+.env
+.env.*
+!.env.example
