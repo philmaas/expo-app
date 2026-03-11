@@ -1,7 +1,6 @@
-import { ScrollView, View, Text, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { ScrollView, View, Text, TouchableOpacity, StyleSheet, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
+import { useState } from 'react';
 
 // ─── Stub data ────────────────────────────────────────────────────────────────
 
@@ -47,6 +46,7 @@ function FilterChips() {
 }
 
 function FeaturedCarousel() {
+  const { width } = useWindowDimensions();
   return (
     <ScrollView
       horizontal
@@ -55,7 +55,7 @@ function FeaturedCarousel() {
       style={styles.featuredCarousel}
     >
       {FEATURED_SHOWS.map((title) => (
-        <TouchableOpacity key={title} style={styles.featuredCard} onPress={() => {}}>
+        <TouchableOpacity key={title} style={[styles.featuredCard, { width }]} onPress={() => {}}>
           <View style={styles.featuredCardPlaceholder} />
           <View style={styles.featuredCardOverlay}>
             <Text style={styles.featuredShowTitle}>{title}</Text>
@@ -140,16 +140,22 @@ function ShowCollection({ title, count }: { title: string; count: number }) {
 // ─── Main screen ──────────────────────────────────────────────────────────────
 
 export default function HomeScreen() {
+  const [headerHeight, setHeaderHeight] = useState(0);
+
   return (
     <View style={styles.root}>
-      <SafeAreaView style={styles.safeArea} edges={['top']}>
+      <SafeAreaView
+        style={styles.safeArea}
+        edges={['top']}
+        onLayout={(e) => setHeaderHeight(e.nativeEvent.layout.height)}
+      >
         <Header />
         <FilterChips />
       </SafeAreaView>
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-        {/* Safe area top offset so content starts below header */}
-        <View style={styles.headerSpacer} />
+        {/* Spacer derived from measured header height so content starts below the floating header */}
+        <View style={{ height: headerHeight }} />
 
         <FeaturedCarousel />
 
@@ -196,10 +202,6 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingBottom: 32,
   },
-  headerSpacer: {
-    height: 100,
-  },
-
   // Header
   header: {
     flexDirection: 'row',
@@ -264,7 +266,6 @@ const styles = StyleSheet.create({
     height: FEATURED_H,
   },
   featuredCard: {
-    width: SCREEN_WIDTH,
     height: FEATURED_H,
   },
   featuredCardPlaceholder: {

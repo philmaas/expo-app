@@ -1,5 +1,6 @@
-import { Tabs, usePathname } from 'expo-router';
+import { Tabs } from 'expo-router';
 import { DarkTheme, ThemeProvider } from '@react-navigation/native';
+import type { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
 import React from 'react';
 import { View, Pressable, StyleSheet } from 'react-native';
@@ -17,19 +18,20 @@ const TABS: { name: string; iconActive: IoniconName; iconInactive: IoniconName; 
   { name: 'profile',  iconActive: 'person-circle',       iconInactive: 'person-circle-outline' },
 ];
 
-function ShowrunnerTabBar({ state, navigation }: { state: any; navigation: any }) {
+function ShowrunnerTabBar({ state, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
-  const pathname = usePathname();
+  const activeRouteName = state.routes[state.index]?.name;
 
   return (
     <View style={[styles.tabBar, { paddingBottom: Math.max(insets.bottom, 8) }]}>
       {TABS.map((tab) => {
-        const isFocused =
-          tab.name === 'index' ? pathname === '/' : pathname.startsWith('/' + tab.name);
-        const routeIndex = state.routes.findIndex((r: any) => r.name === tab.name);
+        const isFocused = activeRouteName === tab.name;
+        const routeIndex = state.routes.findIndex((r) => r.name === tab.name);
+
+        if (routeIndex < 0) return null;
 
         const onPress = () => {
-          const event = navigation.emit({ type: 'tabPress', target: state.routes[routeIndex]?.key, canPreventDefault: true });
+          const event = navigation.emit({ type: 'tabPress', target: state.routes[routeIndex].key, canPreventDefault: true });
           if (!isFocused && !event.defaultPrevented) {
             navigation.navigate(tab.name);
           }
