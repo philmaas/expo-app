@@ -1,116 +1,117 @@
-import {
-  Tabs,
-  TabList,
-  TabTrigger,
-  TabSlot,
-  TabTriggerSlotProps,
-  TabListProps,
-} from 'expo-router/ui';
-import { SymbolView } from 'expo-symbols';
+import { Tabs, TabList, TabTrigger, TabSlot, TabTriggerSlotProps } from 'expo-router/ui';
 import React from 'react';
-import { Pressable, useColorScheme, View, StyleSheet } from 'react-native';
+import { Pressable, View, Text, StyleSheet } from 'react-native';
 
-import { ExternalLink } from './external-link';
-import { ThemedText } from './themed-text';
-import { ThemedView } from './themed-view';
+// ─── Tab bar icons (SF Symbol text equivalents) ───────────────────────────────
 
-import { Colors, MaxContentWidth, Spacing } from '@/constants/theme';
+const TAB_ICONS: Record<string, string> = {
+  home: '⌂',
+  feed: '▶',
+  activity: '🔔',
+  profile: '◉',
+};
+
+function TabIcon({ name, focused }: { name: string; focused?: boolean }) {
+  return (
+    <Text style={[styles.tabIcon, !focused && styles.tabIconDim]}>
+      {TAB_ICONS[name]}
+    </Text>
+  );
+}
+
 
 export default function AppTabs() {
   return (
-    <Tabs>
-      <TabSlot style={{ height: '100%' }} />
+    <Tabs style={{ flex: 1 }}>
+      <TabSlot style={{ flex: 1, paddingBottom: 56 }} />
       <TabList asChild>
-        <CustomTabList>
+        <View style={styles.tabBar}>
           <TabTrigger name="home" href="/" asChild>
-            <TabButton>Home</TabButton>
+            {({ isFocused, ...props }: TabTriggerSlotProps) => (
+              <Pressable {...props} style={styles.tabButton}>
+                <TabIcon name="home" focused={isFocused} />
+              </Pressable>
+            )}
           </TabTrigger>
-          <TabTrigger name="explore" href="/explore" asChild>
-            <TabButton>Explore</TabButton>
+
+          <TabTrigger name="feed" href="/feed" asChild>
+            {({ isFocused, ...props }: TabTriggerSlotProps) => (
+              <Pressable {...props} style={styles.tabButton}>
+                <TabIcon name="feed" focused={isFocused} />
+              </Pressable>
+            )}
           </TabTrigger>
-        </CustomTabList>
+
+          <TabTrigger name="create" href="/create" asChild>
+            {({ ...props }: TabTriggerSlotProps) => (
+              <Pressable {...props} style={styles.plusButton}>
+                <Text style={styles.plusIcon}>+</Text>
+              </Pressable>
+            )}
+          </TabTrigger>
+
+          <TabTrigger name="activity" href="/activity" asChild>
+            {({ isFocused, ...props }: TabTriggerSlotProps) => (
+              <Pressable {...props} style={styles.tabButton}>
+                <TabIcon name="activity" focused={isFocused} />
+              </Pressable>
+            )}
+          </TabTrigger>
+
+          <TabTrigger name="profile" href="/profile" asChild>
+            {({ isFocused, ...props }: TabTriggerSlotProps) => (
+              <Pressable {...props} style={styles.tabButton}>
+                <TabIcon name="profile" focused={isFocused} />
+              </Pressable>
+            )}
+          </TabTrigger>
+        </View>
       </TabList>
     </Tabs>
   );
 }
 
-export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps) {
-  return (
-    <Pressable {...props} style={({ pressed }) => pressed && styles.pressed}>
-      <ThemedView
-        type={isFocused ? 'backgroundSelected' : 'backgroundElement'}
-        style={styles.tabButtonView}>
-        <ThemedText type="small" themeColor={isFocused ? 'text' : 'textSecondary'}>
-          {children}
-        </ThemedText>
-      </ThemedView>
-    </Pressable>
-  );
-}
-
-export function CustomTabList(props: TabListProps) {
-  const scheme = useColorScheme();
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
-
-  return (
-    <View {...props} style={styles.tabListContainer}>
-      <ThemedView type="backgroundElement" style={styles.innerContainer}>
-        <ThemedText type="smallBold" style={styles.brandText}>
-          Expo Starter
-        </ThemedText>
-
-        {props.children}
-
-        <ExternalLink href="https://docs.expo.dev" asChild>
-          <Pressable style={styles.externalPressable}>
-            <ThemedText type="link">Docs</ThemedText>
-            <SymbolView
-              tintColor={colors.text}
-              name={{ ios: 'arrow.up.right.square', web: 'link' }}
-              size={12}
-            />
-          </Pressable>
-        </ExternalLink>
-      </ThemedView>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
-  tabListContainer: {
+  tabBar: {
     position: 'absolute',
-    width: '100%',
-    padding: Spacing.three,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    backgroundColor: '#111',
+    borderTopColor: '#222',
+    borderTopWidth: StyleSheet.hairlineWidth,
+    paddingTop: 8,
+    paddingBottom: 8,
+    alignItems: 'center',
+    justifyContent: 'space-around',
+  },
+  tabButton: {
+    width: 48,
+    height: 38,
+    alignItems: 'center',
     justifyContent: 'center',
+  },
+  tabIcon: {
+    color: '#fff',
+    fontSize: 22,
+    opacity: 1,
+  },
+  tabIconDim: {
+    opacity: 0.4,
+  },
+  plusButton: {
+    width: 48,
+    height: 38,
+    backgroundColor: '#fff',
+    borderRadius: 20,
     alignItems: 'center',
-    flexDirection: 'row',
-  },
-  innerContainer: {
-    paddingVertical: Spacing.two,
-    paddingHorizontal: Spacing.five,
-    borderRadius: Spacing.five,
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexGrow: 1,
-    gap: Spacing.two,
-    maxWidth: MaxContentWidth,
-  },
-  brandText: {
-    marginRight: 'auto',
-  },
-  pressed: {
-    opacity: 0.7,
-  },
-  tabButtonView: {
-    paddingVertical: Spacing.one,
-    paddingHorizontal: Spacing.three,
-    borderRadius: Spacing.three,
-  },
-  externalPressable: {
-    flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
-    gap: Spacing.one,
-    marginLeft: Spacing.three,
+  },
+  plusIcon: {
+    color: '#000',
+    fontSize: 24,
+    fontWeight: '300',
+    lineHeight: 28,
   },
 });
